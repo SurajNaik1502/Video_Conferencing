@@ -1,5 +1,3 @@
-// In middleware.ts
-
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const protectedRoute = createRouteMatcher([
@@ -11,12 +9,13 @@ const protectedRoute = createRouteMatcher([
   '/personal-room',
 ]);
 
-export default clerkMiddleware((auth, req) => {
-  const { userId } = auth();
+export default clerkMiddleware(async (auth, req) => {
+  const authObject = await auth();  // Wait for the auth object to resolve
+  const { userId } = authObject;    // Now you can safely access userId
 
-  // If user is not authenticated and route is protected, redirect to sign-in
+  // If the user is not authenticated and the route is protected, redirect to sign-in
   if (protectedRoute(req) && !userId) {
-    const signInUrl = new URL('/sign-in', req.url); // Adding the redirectUrl here
+    const signInUrl = new URL('/sign-in', req.url);
     return new Response(null, {
       status: 307,
       headers: {
